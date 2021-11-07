@@ -14,7 +14,10 @@ public class GUIController : MonoBehaviour
 
     public void HandleRestartButton()
     {
+
         SceneManager.LoadScene("Game");
+        BlockCreator singleton = BlockCreator.GetSingleton();
+        singleton = null;
     }
    
 }

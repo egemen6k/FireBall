@@ -29,17 +29,28 @@ public class PlayerController : MonoBehaviour {
 
     private bool gameOver = false;
 
+    private Vector3 yOffset;
+
 	void Start ()
     {
         BlockCreator.GetSingleton().Initialize(30, blockPrefabs, pointPrefab);
         FindRelativePosForHingeJoint(new Vector3(0, 5.5f ,0));
+
+        yOffset = new Vector3(0, 4.5f, 0);
 	}
 	
     public void FindRelativePosForHingeJoint(Vector3 blockPosition)
     {
         //Update the block position on this line in a proper way to Find Relative position for our blockPosition
         transform.rotation = Quaternion.Euler(0, 0, 0);
+
+        if (GetComponent<HingeJoint>() == null)
+        {
+            hJoint = gameObject.AddComponent<HingeJoint>();
+        }
         hJoint.anchor = (blockPosition - transform.position) ;
+        
+        lRenderer.enabled = true;
         lRenderer.SetPosition(1, hJoint.anchor);
         lRenderer.enabled = true;
     }
@@ -49,24 +60,28 @@ public class PlayerController : MonoBehaviour {
         Debug.Log("Pointer Down");
 
         Transform blockToCatch = BlockCreator.GetSingleton().GetRelativeBlock(transform.position.z);
-        FindRelativePosForHingeJoint(blockToCatch.position - new Vector3(0,4.5f,0));
-        //This function works once when player holds on the screen
-        //FILL the behaviour here when player holds on the screen. You may or not call other functions you create here or just fill it here
+        FindRelativePosForHingeJoint(blockToCatch.position - yOffset);
     }
 
     public void PointerUp()
     {
         Debug.Log("Pointer Up");
-        //This function works once when player takes his/her finger off the screen
-        //Fill the behaviour when player stops holding the finger on the screen.
+
+        if (!gameOver)
+        {
+            hJoint.breakForce = 1f;
+        }
+
+        lRenderer.enabled = false;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag.Equals("Block") && !gameOver)
         {
-            PointerUp(); //Finishes the game here to stoping holding behaviour
             gameOver = true;
+            PointerUp(); //Finishes the game here to stoping holding behaviour
+
             guiController.scoreText.text = score.ToString("0.00");
             //If you know a more modular way to update UI, change the code below
             if(PlayerPrefs.HasKey("HighScore"))
@@ -108,13 +123,14 @@ public class PlayerController : MonoBehaviour {
     }
     private void FixedUpdate()
     {
-       //Score doesn't set properly since it always tend to update the score. Make a proper way to update the score as player advances
        SetScore();
         
     }
     public void SetScore()
     {
-        score += playerRigidbody.velocity.z * Time.fixedDeltaTime * 0.1f;
+        if(transform.position.z > 0)
+            score = transform.position.z;
+
         guiController.realtimeScoreText.text = score.ToString("0.00");
     }
 }

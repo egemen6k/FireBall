@@ -19,7 +19,7 @@ public class BlockCreator : MonoBehaviour {
     private int zToSpawn = 1;
     private int blockWidth = 1;
     private int firstSpawnBlockCount = 20;
-    private List<GameObject> activeBlocks;
+    private List<GameObject> upperBlocks;
     private GameObject[] sceneBlockes;
 
     private float upperPositionLimitDown, upperPositionLimitUp;
@@ -96,7 +96,7 @@ public class BlockCreator : MonoBehaviour {
         downerPositionLimitDown = -1f;
         downerPositionLimitUp = +1f;
 
-        activeBlocks = new List<GameObject>();
+        upperBlocks = new List<GameObject>();
 
         for (int i = 0; i < firstSpawnBlockCount; i++)
         {
@@ -116,11 +116,10 @@ public class BlockCreator : MonoBehaviour {
         GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
 
         blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * RandomYDowner), Quaternion.identity);
+        GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * RandomYDowner), Quaternion.identity);
 
         zToSpawn += blockWidth;
-        activeBlocks.Add(pooledUpper);
-        //activeBlocks.Add(pooledDowner);
+        upperBlocks.Add(pooledUpper);
     }
 
     void DeleteBlock()
@@ -131,8 +130,8 @@ public class BlockCreator : MonoBehaviour {
             {
                 Destroy(sceneBlockes[i]);
             }
-            activeBlocks[i].SetActive(false);
-            activeBlocks.RemoveAt(i);
+            upperBlocks[i].SetActive(false);
+            upperBlocks.RemoveAt(i);
         }
     }
 
@@ -143,7 +142,6 @@ public class BlockCreator : MonoBehaviour {
         if (player.transform.position.z - 4f > zToSpawn - (firstSpawnBlockCount * blockWidth))
         {
             SpawnBlock();
-            //DeleteBlock();
         }
 
         if (player.transform.position.z > roadmapThreshold)
@@ -160,7 +158,7 @@ public class BlockCreator : MonoBehaviour {
     public Transform GetRelativeBlock(float playerPosZ)
     {
         int indexBlock = (int)Mathf.Round(playerPosZ) + 2;
-        return activeBlocks[indexBlock].transform;
+        return upperBlocks[indexBlock].transform;
 
         //You may need this type of getter to which block are we going to cast our rope into
     }
