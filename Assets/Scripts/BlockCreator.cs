@@ -14,6 +14,7 @@ public class BlockCreator : MonoBehaviour {
     public int blockCount;
 
     public Dictionary<string, Queue<GameObject>> poolDictionary;
+
     private int difficulty = 1;
 
     private int zToSpawn = 1;
@@ -26,6 +27,8 @@ public class BlockCreator : MonoBehaviour {
     private float downerPositionLimitDown, downerPositionLimitUp;
     private float yOffset = 10;
     private float roadmapThreshold = 5f;
+
+    private float pointCountDownTimer = 5f;
 
     #region Singleton Getter
     public static BlockCreator GetSingleton()
@@ -146,7 +149,6 @@ public class BlockCreator : MonoBehaviour {
             {
                 Destroy(sceneBlockes[0]);
                 Destroy(sceneBlockes[1]);
-                Debug.Log("Destroyed");
             }
         }
 
@@ -162,9 +164,25 @@ public class BlockCreator : MonoBehaviour {
         }
     }
 
+    private void Update()
+    {
+        if (pointCountDownTimer <= 0)
+        {
+            PointSpawn(transform.position.z);
+            pointCountDownTimer = 5f;
+        }
+
+        pointCountDownTimer -= Time.deltaTime;
+    }
+
+    private void PointSpawn(float zPos)
+    {
+        Instantiate(pointPrefab, GetRelativeBlock(GameObject.Find("Player").transform.position.z + 4f).position - new Vector3(0, 10f, 0), pointPrefab.transform.rotation);
+    }
+
     public Transform GetRelativeBlock(float playerPosZ)
     {
-        int indexBlock = (int)Mathf.Round(playerPosZ) + 2;
+        int indexBlock = (int)Mathf.Round(playerPosZ) + 3;
         return upperBlocks[indexBlock].transform;
 
         //You may need this type of getter to which block are we going to cast our rope into

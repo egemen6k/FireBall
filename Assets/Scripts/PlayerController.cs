@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using System.Collections;
 
 //In this section, you have to edit OnPointerDown and OnPointerUp sections to make the game behave in a proper way using hJoint
 //Hint: You may want to Destroy and recreate the hinge Joint on the object. For a beautiful gameplay experience, joint would created after a little while (0.2 seconds f.e.) to create mechanical challege for the player
@@ -31,6 +31,11 @@ public class PlayerController : MonoBehaviour {
 
     private Vector3 yOffset;
 
+    private Vector3 playerPositionComparer = Vector3.zero;
+    private float scoreUpdatePositionThreshold = .1f;
+
+    private bool isJointing = false;
+
 	void Start ()
     {
         BlockCreator.GetSingleton().Initialize(30, blockPrefabs, pointPrefab);
@@ -41,7 +46,15 @@ public class PlayerController : MonoBehaviour {
 	
     public void FindRelativePosForHingeJoint(Vector3 blockPosition)
     {
-        //Update the block position on this line in a proper way to Find Relative position for our blockPosition
+        if(!isJointing)
+            StartCoroutine(JointCreater(blockPosition));
+    }
+
+    IEnumerator JointCreater(Vector3 blockPosition)
+    {
+        isJointing = true;
+        yield return new WaitForSeconds(0.2f);
+
         transform.rotation = Quaternion.identity;
         if (GetComponent<HingeJoint>() == null)
         {
@@ -53,6 +66,7 @@ public class PlayerController : MonoBehaviour {
         lRenderer.enabled = true;
         lRenderer.SetPosition(1, hJoint.anchor);
         lRenderer.enabled = true;
+        isJointing = false;
     }
 
     public void PointerDown()
@@ -69,10 +83,10 @@ public class PlayerController : MonoBehaviour {
 
         if (!gameOver)
         {
-            hJoint.breakForce = 1f;
-        }
-
-        lRenderer.enabled = false;
+            if(hJoint != null)
+                hJoint.breakForce = 1f;
+            lRenderer.enabled = false;
+        }     
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -105,7 +119,8 @@ public class PlayerController : MonoBehaviour {
             guiController.gameOverPanel.SetActive(true);
         }
     }
-    
+
+    #region ScoreUpdate
     private void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.tag.Equals("Point"))
@@ -128,9 +143,14 @@ public class PlayerController : MonoBehaviour {
     }
     public void SetScore()
     {
-        if(transform.position.z > 0)
-            score = transform.position.z;
+        if(transform.position.z - playerPositionComparer.z > scoreUpdatePositionThreshold)
+        {
+            score += 0.1f;
+            playerPositionComparer = transform.position;
+        }
 
         guiController.realtimeScoreText.text = score.ToString("0.00");
     }
+
+    #endregion
 }
