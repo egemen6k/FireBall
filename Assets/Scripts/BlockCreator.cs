@@ -10,9 +10,11 @@ public class BlockCreator : MonoBehaviour {
     private static BlockCreator singleton = null;
     private GameObject[] blockPrefabs;
     private GameObject pointPrefab;
-    private GameObject pointObject;
-    public int blockCount;
 
+    private Transform playerTR;
+    private Vector3 yOffsetPoint = new Vector3(0, 10f, 0);
+
+    public int blockCount;
     public Dictionary<string, Queue<GameObject>> poolDictionary;
 
     private int difficulty = 1;
@@ -23,12 +25,15 @@ public class BlockCreator : MonoBehaviour {
     private List<GameObject> upperBlocks;
     private GameObject[] sceneBlockes;
 
-    private float upperPositionLimitDown, upperPositionLimitUp;
-    private float downerPositionLimitDown, downerPositionLimitUp;
+    private float upperBoxesLowest, upperBoxesHighest;
+    private float downerBoxesLowest, downerBoxesHighest;
+
     private float yOffset = 10;
-    private float roadmapThreshold = 5f;
+    private float roadmapThreshold = 20f;
 
     private float pointCountDownTimer = 5f;
+
+    private bool limitHeight = false;
 
     #region Singleton Getter
     public static BlockCreator GetSingleton()
@@ -91,11 +96,12 @@ public class BlockCreator : MonoBehaviour {
 
     private void Start()
     {
-        upperPositionLimitDown = -1f;
-        upperPositionLimitUp = +1f;
+        playerTR = GameObject.Find("Player").transform;
 
-        downerPositionLimitDown = -1f;
-        downerPositionLimitUp = +1f;
+        upperBoxesHighest = 2f;
+        upperBoxesLowest = -2f;
+        downerBoxesHighest = 2f;
+        downerBoxesLowest = -2f;
 
         upperBlocks = new List<GameObject>();
 
@@ -107,11 +113,11 @@ public class BlockCreator : MonoBehaviour {
         sceneBlockes = GameObject.FindGameObjectsWithTag("Block");
     }
 
-    #region Block Adder&Deleter
+    #region Block Adder & Updater
     private void SpawnBlock()
     {
-        float RandomYUpper = Random.Range(upperPositionLimitDown, upperPositionLimitUp) + yOffset;
-        float RandomYDowner = Random.Range(downerPositionLimitDown, downerPositionLimitUp) + yOffset;
+        float RandomYUpper = Random.Range(upperBoxesLowest, upperBoxesHighest) + yOffset;
+        float RandomYDowner = Random.Range(downerBoxesLowest, downerBoxesHighest) + yOffset;
 
         int blockIndex = Random.Range(0, blockPrefabs.Length);
         GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
@@ -123,20 +129,6 @@ public class BlockCreator : MonoBehaviour {
         upperBlocks.Add(pooledUpper);
     }
 
-    void DeleteBlock()
-    {
-        for (int i = 1; i >= 0; i--)
-        {
-            if (sceneBlockes[i] != null)
-            {
-                Destroy(sceneBlockes[i]);
-            }
-            upperBlocks[i].SetActive(false);
-            upperBlocks.RemoveAt(i);
-        }
-    }
-
-    #endregion
 
     public void UpdateBlockPosition(Transform player)
     {
@@ -155,36 +147,51 @@ public class BlockCreator : MonoBehaviour {
         //daha güzel yazılabilir.
         if (player.transform.position.z > roadmapThreshold)
         {
-            upperPositionLimitDown+= .1f;
-            upperPositionLimitUp += .1f;
-            downerPositionLimitDown-= .1f;
-            downerPositionLimitUp -= .1f;
+            if (!limitHeight)
+            {
+                upperBoxesLowest += 0.5f;
+                upperBoxesHighest += 0.5f;
+                downerBoxesLowest -= 0.5f;
+                downerBoxesHighest -= 0.5f;
 
+                if (upperBoxesHighest >= 3f)
+                    limitHeight = true;
+            }
+            else
+            {
+                upperBoxesLowest -= 0.5f;
+                upperBoxesHighest -= 0.5f;
+                downerBoxesLowest += 0.5f;
+                downerBoxesHighest += 0.5f;
+
+                if (downerBoxesLowest <= -3f)
+                    limitHeight = false;
+            }
             roadmapThreshold *= 2;
         }
     }
+
+    #endregion
 
     private void Update()
     {
         if (pointCountDownTimer <= 0)
         {
-            PointSpawn(transform.position.z);
+            PointSpawn();
             pointCountDownTimer = 5f;
         }
 
         pointCountDownTimer -= Time.deltaTime;
     }
 
-    private void PointSpawn(float zPos)
+    private void PointSpawn()
     {
-        Instantiate(pointPrefab, GetRelativeBlock(GameObject.Find("Player").transform.position.z + 4f).position - new Vector3(0, 10f, 0), pointPrefab.transform.rotation);
+        Instantiate(pointPrefab, GetRelativeBlock(playerTR.position.z + 4f).position - yOffsetPoint, pointPrefab.transform.rotation);
     }
 
     public Transform GetRelativeBlock(float playerPosZ)
     {
         int indexBlock = (int)Mathf.Round(playerPosZ) + 3;
         return upperBlocks[indexBlock].transform;
-
-        //You may need this type of getter to which block are we going to cast our rope into
     }
 }

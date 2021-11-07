@@ -133,7 +133,9 @@ public class PlayerController : MonoBehaviour {
             {
                 score += 5f;
             }
-            other.gameObject.SetActive(false);
+
+            Transform parentTarget = other.transform.parent;
+            Destroy(parentTarget.gameObject);    
         }
     }
     private void FixedUpdate()
