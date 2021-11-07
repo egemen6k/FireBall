@@ -24,9 +24,10 @@ public class BlockCreator : MonoBehaviour {
 
     private float upperPositionLimitDown, upperPositionLimitUp;
     private float downerPositionLimitDown, downerPositionLimitUp;
+    private float yOffset = 10;
     private float roadmapThreshold = 5f;
 
-
+    #region Singleton Getter
     public static BlockCreator GetSingleton()
     {
         if (singleton == null)
@@ -35,7 +36,9 @@ public class BlockCreator : MonoBehaviour {
         }
         return singleton;
     }
+    #endregion
 
+    #region ObjectPooler Setter&Getter
     public void Initialize(int bCount, GameObject[] bPrefabs, GameObject pPrefab)
     {
         blockCount = bCount;
@@ -81,6 +84,10 @@ public class BlockCreator : MonoBehaviour {
         return objectToSpawn;
     }
 
+    #endregion
+
+
+
     private void Start()
     {
         upperPositionLimitDown = -2f;
@@ -99,16 +106,17 @@ public class BlockCreator : MonoBehaviour {
         sceneBlockes = GameObject.FindGameObjectsWithTag("Block");
     }
 
+    #region Block Adder&Deleter
     private void SpawnBlock()
     {
-        float RandomYUpper = Random.Range(upperPositionLimitDown, upperPositionLimitUp);
-        float RandomYDowner = Random.Range(downerPositionLimitDown, downerPositionLimitUp);
+        float RandomYUpper = Random.Range(upperPositionLimitDown, upperPositionLimitUp) + yOffset;
+        float RandomYDowner = Random.Range(downerPositionLimitDown, downerPositionLimitUp) + yOffset;
 
         int blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * (RandomYUpper + 10)), Quaternion.identity);
+        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
 
         blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * (RandomYDowner + 10)), Quaternion.identity);
+        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * RandomYDowner), Quaternion.identity);
 
         zToSpawn += blockWidth;
         activeBlocks.Add(pooledUpper);
@@ -119,11 +127,16 @@ public class BlockCreator : MonoBehaviour {
     {
         for (int i = 1; i >= 0; i--)
         {
-            Destroy(sceneBlockes[i]);
+            if (sceneBlockes[i] != null)
+            {
+                Destroy(sceneBlockes[i]);
+            }
             activeBlocks[i].SetActive(false);
             activeBlocks.RemoveAt(i);
         }
     }
+
+    #endregion
 
     public void UpdateBlockPosition(Transform player)
     {
