@@ -27,8 +27,6 @@ public class BlockCreator : MonoBehaviour {
     private float yOffset = 10;
     private float roadmapThreshold = 5f;
 
-    int zPosition = 2;
-
     #region Singleton Getter
     public static BlockCreator GetSingleton()
     {
@@ -142,8 +140,17 @@ public class BlockCreator : MonoBehaviour {
         if (player.transform.position.z - 4f > zToSpawn - (firstSpawnBlockCount * blockWidth))
         {
             SpawnBlock();
+
+            //daha güzel yazılabilir.
+            if (sceneBlockes[0] != null)
+            {
+                Destroy(sceneBlockes[0]);
+                Destroy(sceneBlockes[1]);
+                Debug.Log("Destroyed");
+            }
         }
 
+        //daha güzel yazılabilir.
         if (player.transform.position.z > roadmapThreshold)
         {
             upperPositionLimitDown+= .1f;

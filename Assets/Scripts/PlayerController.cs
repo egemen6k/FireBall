@@ -42,14 +42,14 @@ public class PlayerController : MonoBehaviour {
     public void FindRelativePosForHingeJoint(Vector3 blockPosition)
     {
         //Update the block position on this line in a proper way to Find Relative position for our blockPosition
-        transform.rotation = Quaternion.Euler(0, 0, 0);
-
+        transform.rotation = Quaternion.identity;
         if (GetComponent<HingeJoint>() == null)
         {
             hJoint = gameObject.AddComponent<HingeJoint>();
         }
         hJoint.anchor = (blockPosition - transform.position) ;
-        
+
+        playerRigidbody.AddRelativeForce(Vector3.forward * 50f);
         lRenderer.enabled = true;
         lRenderer.SetPosition(1, hJoint.anchor);
         lRenderer.enabled = true;

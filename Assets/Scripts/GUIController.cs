@@ -16,8 +16,8 @@ public class GUIController : MonoBehaviour
     {
 
         SceneManager.LoadScene("Game");
-        BlockCreator singleton = BlockCreator.GetSingleton();
-        singleton = null;
+        /*BlockCreator singleton = BlockCreator.GetSingleton();
+        singleton = null;*/
     }
    
 }
