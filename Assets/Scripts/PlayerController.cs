@@ -36,7 +36,9 @@ public class PlayerController : MonoBehaviour {
 
         FindRelativePosForHingeJoint(new Vector3(0, 5.5f ,0));
         playerRigidbody.AddRelativeForce(Vector3.forward * 75f);
-	}
+
+        guiController.holdStartText.SetActive(true);
+    }
 
     #region JointMaker
     public void FindRelativePosForHingeJoint(Vector3 blockPosition)
@@ -70,7 +72,10 @@ public class PlayerController : MonoBehaviour {
     {
         Transform blockToCatch = blockCreator.GetRelativeBlock(transform.position.z);
         FindRelativePosForHingeJoint(blockToCatch.position - yOffset);
+
         particleEffect.SetActive(true);
+
+        guiController.holdStartText.SetActive(false);
     }
 
     public void PointerUp()
@@ -94,7 +99,7 @@ public class PlayerController : MonoBehaviour {
             PointerUp(); //Finishes the game here to stoping holding behaviour
 
             guiController.scoreText.text = score.ToString("0.00");
-            //If you know a more modular way to update UI, change the code below
+            
             if(PlayerPrefs.HasKey("HighScore"))
             {
                 float highestScore = PlayerPrefs.GetFloat("HighScore");

@@ -9,6 +9,7 @@ public class BlockCreator : MonoBehaviour {
     private GameObject pointPrefab;
 
     private Transform playerTR;
+    private float pointThresholdZ = 5f;
     private Vector3 pointSpawnOffset = new Vector3(0, 10f, 0);
 
     public Dictionary<string, Queue<GameObject>> poolDictionary;
@@ -148,10 +149,11 @@ public class BlockCreator : MonoBehaviour {
 
     private void Update()
     {
-        if (pointCountDownTimer <= 0 )
+        if (pointCountDownTimer <= 0 && playerTR.position.z > pointThresholdZ)
         {
             PointSpawn();
             pointCountDownTimer = 5f;
+            pointThresholdZ += 30;
         }
 
         pointCountDownTimer -= Time.deltaTime;
