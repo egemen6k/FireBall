@@ -14,8 +14,6 @@ public class BlockCreator : MonoBehaviour {
     public int blockCount;
 
     public Dictionary<string, Queue<GameObject>> poolDictionary;
-    private float lastHeightUpperBlock = 10;
-    private float lastHeightDownerBlock = -10;
     private int difficulty = 1;
 
     private int zToSpawn = 1;

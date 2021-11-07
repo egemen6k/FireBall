@@ -18,7 +18,7 @@ public class PlayerFollower : MonoBehaviour {
         yDifference = player.transform.position.y - transform.position.y;
     }
 
-    int lastPassageIndex = -1;
+    //int lastPassageIndex = -1;
     private void Update()
     {
         if(player != null)
