@@ -23,6 +23,7 @@ public class PlayerFollower : MonoBehaviour {
     {
         if(player != null)
         {
+            BlockCreator.GetSingleton().UpdateBlockPosition(player.transform);
             transform.position = new Vector3(transform.position.x, player.position.y - yDifference, player.position.z - zDifference);
             //BlockCreator.GetSingleton().UpdateBlockPosition(passageIndex); //You may call update block position here to make it an infinite map.
             //Hint:

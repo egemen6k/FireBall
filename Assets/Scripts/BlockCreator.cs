@@ -13,13 +13,21 @@ public class BlockCreator : MonoBehaviour {
     private GameObject pointObject;
     public int blockCount;
 
-    private List<GameObject> blockPool = new List<GameObject>();
+    public Dictionary<string, Queue<GameObject>> poolDictionary;
     private float lastHeightUpperBlock = 10;
+    private float lastHeightDownerBlock = -10;
     private int difficulty = 1;
+
+    private int zToSpawn = 1;
+    private int blockWidth = 1;
+    private int firstSpawnBlockCount = 20;
+    private int blocksSize;
+    private List<GameObject> activeBlocks;
+    private GameObject[] sceneBlockes;
 
     public static BlockCreator GetSingleton()
     {
-        if(singleton == null)
+        if (singleton == null)
         {
             singleton = new GameObject("_BlockCreator").AddComponent<BlockCreator>();
         }
@@ -33,16 +41,88 @@ public class BlockCreator : MonoBehaviour {
         pointPrefab = pPrefab;
         InstantiateBlocks();
     }
-    
-	
+
+
+    //Object Pooler Instantiation
     public void InstantiateBlocks()
     {
-        //Instantiate blocks here
+        poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        GameObject parentEmptyObject = GameObject.Find("PooledObjects");
+        foreach (GameObject block in blockPrefabs)
+        {
+            Queue<GameObject> objectPool = new Queue<GameObject>();
+            for (int i = 0; i < blockCount; i++)
+            {
+                GameObject obj = Instantiate(block);
+                obj.transform.parent = parentEmptyObject.transform;
+                //obj.hideFlags = HideFlags.HideInHierarchy;
+                obj.SetActive(false);
+                objectPool.Enqueue(obj);
+            }
+            poolDictionary.Add(block.name, objectPool);
+        }
     }
 
-    void Update () {
-		
-	}
+    //Pulling pooled object
+    public GameObject GetPooledBlock(string tag, Vector3 position, Quaternion rotation)
+    {
+        if (!poolDictionary.ContainsKey(tag))
+        {
+            Debug.Log("TAG is NULL!!!");
+        }
+
+        GameObject objectToSpawn = poolDictionary[tag].Dequeue();
+        objectToSpawn.SetActive(true);
+        objectToSpawn.transform.position = position;
+        objectToSpawn.transform.rotation = rotation;
+        poolDictionary[tag].Enqueue(objectToSpawn);
+        return objectToSpawn;
+    }
+
+    private void Start()
+    {
+        blocksSize = poolDictionary.Count;
+        activeBlocks = new List<GameObject>();
+
+        for (int i = 0; i < firstSpawnBlockCount; i++)
+        {
+            SpawnBlock();
+        }
+
+        sceneBlockes = GameObject.FindGameObjectsWithTag("Block");
+    }
+
+    private void SpawnBlock()
+    {
+        int RandomY = Random.Range(8, 13);
+
+        int blockIndex = Random.Range(0, blockPrefabs.Length);
+        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomY), Quaternion.identity);
+
+        blockIndex = Random.Range(0, blockPrefabs.Length);
+        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) - (Vector3.up * RandomY), Quaternion.identity);
+
+        zToSpawn += blockWidth;
+        activeBlocks.Add(pooledUpper);
+        activeBlocks.Add(pooledDowner);
+    }
+
+    void Update()
+    {
+
+    }
+
+    void DeleteBlock()
+    {
+        for (int i = 1; i >= 0; i--)
+        {
+            Destroy(sceneBlockes[i]);
+            activeBlocks[i].SetActive(false);
+            activeBlocks.RemoveAt(i);
+        }
+    }
+
+    //Yukarı ve aşağı ilerlemeli hissi için transform.z ile değişen Y offset değeri eklenecek.
 
     public Transform GetRelativeBlock(float playerPosZ)
     {
@@ -50,8 +130,12 @@ public class BlockCreator : MonoBehaviour {
         return null;
     }
 
-    public void UpdateBlockPosition(int blockIndex)
+    public void UpdateBlockPosition(Transform player)
     {
-        //Block Pool has been created. Find a proper way to make infite map when it is needed
+        if (player.transform.position.z - 10f > zToSpawn - (firstSpawnBlockCount * blockWidth))
+        {
+            SpawnBlock();
+            DeleteBlock();
+        }
     }
 }
