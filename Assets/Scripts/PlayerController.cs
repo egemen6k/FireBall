@@ -1,12 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-//In this section, you have to edit OnPointerDown and OnPointerUp sections to make the game behave in a proper way using hJoint
-//Hint: You may want to Destroy and recreate the hinge Joint on the object. For a beautiful gameplay experience, joint would created after a little while (0.2 seconds f.e.) to create mechanical challege for the player
-//And also create fixed update to make score calculated real time properly.
-//Update FindRelativePosForHingeJoint to calculate the position for you rope to connect dynamically
-//You may add up new functions into this class to make it look more understandable and cosmetically great.
-
 public class PlayerController : MonoBehaviour {
 
     [SerializeField]
@@ -18,35 +12,33 @@ public class PlayerController : MonoBehaviour {
     [SerializeField]
     private Rigidbody playerRigidbody;
     [SerializeField]
-    private PlayerFollower playerFollower;
-    [SerializeField]
     private GameObject pointPrefab;
     [SerializeField]
     private GUIController guiController;
+    [SerializeField] 
+    private GameObject particleEffect;
 
     private BlockCreator blockCreator;
 
-    private float score;
-
     private bool gameOver = false;
-
-    private Vector3 yOffset;
+    private Vector3 yOffset = new Vector3(0, 4.5f, 0);
+    private bool isJointing = false;
 
     private Vector3 playerPositionComparer = Vector3.zero;
-    private float scoreUpdatePositionThreshold = .1f;
+    private float score;
+    private float scoreUpdateZDifference = .1f;
 
-    private bool isJointing = false;
 
 	void Start ()
     {
         blockCreator = BlockCreator.GetSingleton();
         blockCreator.Initialize(30, blockPrefabs, pointPrefab);
-        FindRelativePosForHingeJoint(new Vector3(0, 5.5f ,0));
-        yOffset = new Vector3(0, 4.5f, 0);
 
+        FindRelativePosForHingeJoint(new Vector3(0, 5.5f ,0));
         playerRigidbody.AddRelativeForce(Vector3.forward * 75f);
 	}
-	
+
+    #region JointMaker
     public void FindRelativePosForHingeJoint(Vector3 blockPosition)
     {
         if(!isJointing)
@@ -63,7 +55,7 @@ public class PlayerController : MonoBehaviour {
         {
             hJoint = gameObject.AddComponent<HingeJoint>();
         }
-        hJoint.anchor = (blockPosition - transform.position) ;
+        hJoint.anchor = (blockPosition - transform.position);
 
         playerRigidbody.AddRelativeForce(Vector3.forward * 75f);
         lRenderer.enabled = true;
@@ -71,27 +63,29 @@ public class PlayerController : MonoBehaviour {
         lRenderer.enabled = true;
         isJointing = false;
     }
+    #endregion
 
+    #region Pointer Callbacks
     public void PointerDown()
     {
-        Debug.Log("Pointer Down");
-
         Transform blockToCatch = blockCreator.GetRelativeBlock(transform.position.z);
         FindRelativePosForHingeJoint(blockToCatch.position - yOffset);
+        particleEffect.SetActive(true);
     }
 
     public void PointerUp()
     {
-        Debug.Log("Pointer Up");
-
         if (!gameOver)
         {
             if(hJoint != null)
                 hJoint.breakForce = 1f;
             lRenderer.enabled = false;
+            particleEffect.SetActive(false);
         }     
     }
+    #endregion
 
+    #region EndGame
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag.Equals("Block") && !gameOver)
@@ -122,6 +116,7 @@ public class PlayerController : MonoBehaviour {
             guiController.gameOverPanel.SetActive(true);
         }
     }
+    #endregion
 
     #region ScoreUpdate
     private void OnTriggerEnter(Collider other)
@@ -148,14 +143,12 @@ public class PlayerController : MonoBehaviour {
     }
     public void SetScore()
     {
-        if(transform.position.z - playerPositionComparer.z > scoreUpdatePositionThreshold)
+        if(transform.position.z - playerPositionComparer.z > scoreUpdateZDifference)
         {
             score += 0.1f;
             playerPositionComparer = transform.position;
         }
-
         guiController.realtimeScoreText.text = score.ToString("0.00");
     }
-
     #endregion
 }
