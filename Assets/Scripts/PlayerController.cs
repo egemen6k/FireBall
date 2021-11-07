@@ -43,6 +43,8 @@ public class PlayerController : MonoBehaviour {
         blockCreator.Initialize(30, blockPrefabs, pointPrefab);
         FindRelativePosForHingeJoint(new Vector3(0, 5.5f ,0));
         yOffset = new Vector3(0, 4.5f, 0);
+
+        playerRigidbody.AddRelativeForce(Vector3.forward * 75f);
 	}
 	
     public void FindRelativePosForHingeJoint(Vector3 blockPosition)
@@ -63,7 +65,7 @@ public class PlayerController : MonoBehaviour {
         }
         hJoint.anchor = (blockPosition - transform.position) ;
 
-        playerRigidbody.AddRelativeForce(Vector3.forward * 50f);
+        playerRigidbody.AddRelativeForce(Vector3.forward * 75f);
         lRenderer.enabled = true;
         lRenderer.SetPosition(1, hJoint.anchor);
         lRenderer.enabled = true;

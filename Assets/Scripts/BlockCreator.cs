@@ -23,10 +23,7 @@ public class BlockCreator : MonoBehaviour {
     private List<GameObject> upperBlocks;
     private GameObject[] sceneBlockes;
 
-    [SerializeField]
-    private float upperBoxesHighest, downerBoxesHighest;
     private bool limitHeight = false;
-
     private float yOffset = 10;
     private float roadmapThreshold = 5f;
 
@@ -97,9 +94,6 @@ public class BlockCreator : MonoBehaviour {
     {
         playerTR = GameObject.Find("Player").transform;
 
-        upperBoxesHighest = 3f;
-        downerBoxesHighest = 3f;
-
         upperBlocks = new List<GameObject>();
 
         for (int i = 0; i < firstSpawnBlockCount; i++)
@@ -113,8 +107,8 @@ public class BlockCreator : MonoBehaviour {
     #region Block Adder & Updater
     private void SpawnBlock()
     {
-        float RandomYUpper = Random.Range(-2,2) + yOffset;
-        float RandomYDowner = Random.Range(-2,2) - 20 + yOffset;
+        float RandomYUpper = Random.Range(-1.5f,1.5f) + yOffset;
+        float RandomYDowner = Random.Range(-1.5f,1.5f) + yOffset - 20;
 
         int blockIndex = Random.Range(0, blockPrefabs.Length);
         GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
@@ -138,35 +132,25 @@ public class BlockCreator : MonoBehaviour {
                 Destroy(sceneBlockes[0]);
                 Destroy(sceneBlockes[1]);
             }
-        }
 
-        //daha güzel yazılabilir.
-        if (player.transform.position.z > roadmapThreshold)
-        {
             if (!limitHeight)
             {
-                yOffset += 1f;
+                yOffset += .2f;
 
-                if (yOffset >= 30f)
+                if (yOffset >= 15f)
                 {
                     limitHeight = true;
-                    Debug.Log("Aşağıya gidiyor");
                 }
-
             }
             else
             {
-                yOffset -= 1f;
+                yOffset -= .2f;
 
                 if (yOffset <= 10f)
                 {
                     limitHeight = false;
-                    Debug.Log("Yukarı gidiyor.");
                 }
-
             }
-            Debug.Log(yOffset);
-            roadmapThreshold += 10f;
         }
     }
 
