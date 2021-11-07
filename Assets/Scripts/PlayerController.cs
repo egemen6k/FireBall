@@ -22,8 +22,9 @@ public class PlayerController : MonoBehaviour {
     [SerializeField]
     private GameObject pointPrefab;
     [SerializeField]
-    
     private GUIController guiController;
+
+    private BlockCreator blockCreator;
 
     private float score;
 
@@ -38,9 +39,9 @@ public class PlayerController : MonoBehaviour {
 
 	void Start ()
     {
-        BlockCreator.GetSingleton().Initialize(30, blockPrefabs, pointPrefab);
+        blockCreator = BlockCreator.GetSingleton();
+        blockCreator.Initialize(30, blockPrefabs, pointPrefab);
         FindRelativePosForHingeJoint(new Vector3(0, 5.5f ,0));
-
         yOffset = new Vector3(0, 4.5f, 0);
 	}
 	
@@ -73,7 +74,7 @@ public class PlayerController : MonoBehaviour {
     {
         Debug.Log("Pointer Down");
 
-        Transform blockToCatch = BlockCreator.GetSingleton().GetRelativeBlock(transform.position.z);
+        Transform blockToCatch = blockCreator.GetRelativeBlock(transform.position.z);
         FindRelativePosForHingeJoint(blockToCatch.position - yOffset);
     }
 

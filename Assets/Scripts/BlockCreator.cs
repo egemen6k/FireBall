@@ -17,23 +17,22 @@ public class BlockCreator : MonoBehaviour {
     public int blockCount;
     public Dictionary<string, Queue<GameObject>> poolDictionary;
 
-    private int difficulty = 1;
-
     private int zToSpawn = 1;
     private int blockWidth = 1;
     private int firstSpawnBlockCount = 20;
     private List<GameObject> upperBlocks;
     private GameObject[] sceneBlockes;
 
-    private float upperBoxesLowest, upperBoxesHighest;
-    private float downerBoxesLowest, downerBoxesHighest;
+    [SerializeField]
+    private float upperBoxesHighest, downerBoxesHighest;
+    private bool limitHeight = false;
 
     private float yOffset = 10;
-    private float roadmapThreshold = 20f;
+    private float roadmapThreshold = 5f;
 
     private float pointCountDownTimer = 5f;
 
-    private bool limitHeight = false;
+
 
     #region Singleton Getter
     public static BlockCreator GetSingleton()
@@ -98,10 +97,8 @@ public class BlockCreator : MonoBehaviour {
     {
         playerTR = GameObject.Find("Player").transform;
 
-        upperBoxesHighest = 2f;
-        upperBoxesLowest = -2f;
-        downerBoxesHighest = 2f;
-        downerBoxesLowest = -2f;
+        upperBoxesHighest = 3f;
+        downerBoxesHighest = 3f;
 
         upperBlocks = new List<GameObject>();
 
@@ -116,14 +113,14 @@ public class BlockCreator : MonoBehaviour {
     #region Block Adder & Updater
     private void SpawnBlock()
     {
-        float RandomYUpper = Random.Range(upperBoxesLowest, upperBoxesHighest) + yOffset;
-        float RandomYDowner = Random.Range(downerBoxesLowest, downerBoxesHighest) + yOffset;
+        float RandomYUpper = Random.Range(-2,2) + yOffset;
+        float RandomYDowner = Random.Range(-2,2) - 20 + yOffset;
 
         int blockIndex = Random.Range(0, blockPrefabs.Length);
         GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
 
         blockIndex = Random.Range(0, blockPrefabs.Length);
-        GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * RandomYDowner), Quaternion.identity);
+        GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYDowner), Quaternion.identity);
 
         zToSpawn += blockWidth;
         upperBlocks.Add(pooledUpper);
@@ -136,7 +133,6 @@ public class BlockCreator : MonoBehaviour {
         {
             SpawnBlock();
 
-            //daha güzel yazılabilir.
             if (sceneBlockes[0] != null)
             {
                 Destroy(sceneBlockes[0]);
@@ -149,25 +145,28 @@ public class BlockCreator : MonoBehaviour {
         {
             if (!limitHeight)
             {
-                upperBoxesLowest += 0.5f;
-                upperBoxesHighest += 0.5f;
-                downerBoxesLowest -= 0.5f;
-                downerBoxesHighest -= 0.5f;
+                yOffset += 1f;
 
-                if (upperBoxesHighest >= 3f)
+                if (yOffset >= 30f)
+                {
                     limitHeight = true;
+                    Debug.Log("Aşağıya gidiyor");
+                }
+
             }
             else
             {
-                upperBoxesLowest -= 0.5f;
-                upperBoxesHighest -= 0.5f;
-                downerBoxesLowest += 0.5f;
-                downerBoxesHighest += 0.5f;
+                yOffset -= 1f;
 
-                if (downerBoxesLowest <= -3f)
+                if (yOffset <= 10f)
+                {
                     limitHeight = false;
+                    Debug.Log("Yukarı gidiyor.");
+                }
+
             }
-            roadmapThreshold *= 2;
+            Debug.Log(yOffset);
+            roadmapThreshold += 10f;
         }
     }
 
