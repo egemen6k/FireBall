@@ -1,8 +1,4 @@
-﻿//This class is on the main camera to follow player.
-//You may optimize it on SetPosition section and
-//Write a proper way to update blocks positions on the map to make it an infite gameplay.
-
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerFollower : MonoBehaviour {
 
@@ -20,6 +16,8 @@ public class PlayerFollower : MonoBehaviour {
         SetPosition(GameObject.Find("Player").transform);
     }
 
+
+    //Camera position set after player movement
     private void LateUpdate()
     {
         if(player != null)

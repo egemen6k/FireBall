@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour {
     private Vector3 yOffset = new Vector3(0, 4.5f, 0);
     private bool isJointing = false;
 
-    private Vector3 playerPositionComparer = Vector3.zero;
+    private Vector3 playerPositionHolder = Vector3.zero;
     private float score;
     private float scoreUpdateZDifference = .1f;
 
@@ -58,7 +58,6 @@ public class PlayerController : MonoBehaviour {
             hJoint = gameObject.AddComponent<HingeJoint>();
         }
         hJoint.anchor = (blockPosition - transform.position);
-
         playerRigidbody.AddRelativeForce(Vector3.forward * 75f);
         lRenderer.enabled = true;
         lRenderer.SetPosition(1, hJoint.anchor);
@@ -72,9 +71,7 @@ public class PlayerController : MonoBehaviour {
     {
         Transform blockToCatch = blockCreator.GetRelativeBlock(transform.position.z);
         FindRelativePosForHingeJoint(blockToCatch.position - yOffset);
-
         particleEffect.SetActive(true);
-
         guiController.holdStartText.SetActive(false);
     }
 
@@ -97,7 +94,6 @@ public class PlayerController : MonoBehaviour {
         {
             gameOver = true;
             PointerUp(); //Finishes the game here to stoping holding behaviour
-
             guiController.scoreText.text = score.ToString("0.00");
             
             if(PlayerPrefs.HasKey("HighScore"))
@@ -143,15 +139,14 @@ public class PlayerController : MonoBehaviour {
     }
     private void FixedUpdate()
     {
-       SetScore();
-        
+       SetScore();       
     }
     public void SetScore()
     {
-        if(transform.position.z - playerPositionComparer.z > scoreUpdateZDifference)
+        if(transform.position.z - playerPositionHolder.z > scoreUpdateZDifference)
         {
             score += 0.1f;
-            playerPositionComparer = transform.position;
+            playerPositionHolder = transform.position;
         }
         guiController.realtimeScoreText.text = score.ToString("0.00");
     }

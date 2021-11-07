@@ -10,10 +10,11 @@ public class BlockCreator : MonoBehaviour {
 
     private Transform playerTR;
     private float pointThresholdZ = 5f;
-    private Vector3 pointSpawnOffset = new Vector3(0, 10f, 0);
+    private Vector3 pointSpawnOffset = new Vector3(0, 10f, -6);
 
     public Dictionary<string, Queue<GameObject>> poolDictionary;
 
+    private float randomYUpper, randomYDowner;
     private int zToSpawn = 1;
     private int blockWidth = 1;
     private int firstSpawnBlockCount = 20;
@@ -25,7 +26,7 @@ public class BlockCreator : MonoBehaviour {
 
     private float pointCountDownTimer = 5f;
 
-
+    private int relativeBlockOffset = 3;
 
     #region Singleton Getter
     public static BlockCreator GetSingleton()
@@ -60,7 +61,6 @@ public class BlockCreator : MonoBehaviour {
             {
                 GameObject obj = Instantiate(block);
                 obj.transform.parent = parentEmptyObject.transform;
-                //obj.hideFlags = HideFlags.HideInHierarchy;
                 obj.SetActive(false);
                 objectPool.Enqueue(obj);
             }
@@ -83,7 +83,6 @@ public class BlockCreator : MonoBehaviour {
         poolDictionary[tag].Enqueue(objectToSpawn);
         return objectToSpawn;
     }
-
     #endregion
 
     private void Start()
@@ -101,15 +100,17 @@ public class BlockCreator : MonoBehaviour {
     #region Block Adder & Updater
     private void SpawnBlock()
     {
-        float RandomYUpper = Random.Range(-1.5f,1.5f) + yOffset;
-        float RandomYDowner = Random.Range(-1.5f,1.5f) + yOffset - 20;
+        float randomValue = Random.Range(-1.5f, 1.5f);
+
+        randomYUpper =  randomValue + yOffset;
+        randomYDowner = randomValue + yOffset - 20;
 
         int blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
+        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * randomYUpper), Quaternion.identity);
         upperBlocks.Add(pooledUpper);
 
         blockIndex = Random.Range(0, blockPrefabs.Length);
-        GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYDowner), Quaternion.identity);
+        GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * randomYDowner), Quaternion.identity);
 
         zToSpawn += blockWidth;
     }
@@ -155,17 +156,16 @@ public class BlockCreator : MonoBehaviour {
             pointCountDownTimer = 5f;
             pointThresholdZ += 30;
         }
-
         pointCountDownTimer -= Time.deltaTime;
     }
     private void PointSpawn()
     {
-        Instantiate(pointPrefab, GetRelativeBlock(playerTR.position.z + 4f).position - pointSpawnOffset, pointPrefab.transform.rotation);
+        Instantiate(pointPrefab, GetRelativeBlock(playerTR.position.z).position - pointSpawnOffset, pointPrefab.transform.rotation);
     }
 
     public Transform GetRelativeBlock(float playerPosZ)
     {
-        int indexBlock = (int)Mathf.Round(playerPosZ) + 3;
+        int indexBlock = (int)Mathf.Round(playerPosZ) + relativeBlockOffset;
         return upperBlocks[indexBlock].transform;
     }
 }
