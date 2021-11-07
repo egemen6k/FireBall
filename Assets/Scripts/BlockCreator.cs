@@ -27,6 +27,8 @@ public class BlockCreator : MonoBehaviour {
     private float yOffset = 10;
     private float roadmapThreshold = 5f;
 
+    int zPosition = 2;
+
     #region Singleton Getter
     public static BlockCreator GetSingleton()
     {
@@ -86,15 +88,13 @@ public class BlockCreator : MonoBehaviour {
 
     #endregion
 
-
-
     private void Start()
     {
-        upperPositionLimitDown = -2f;
-        upperPositionLimitUp = +2f;
+        upperPositionLimitDown = -1f;
+        upperPositionLimitUp = +1f;
 
-        downerPositionLimitDown = -2f;
-        downerPositionLimitUp = +2f;
+        downerPositionLimitDown = -1f;
+        downerPositionLimitUp = +1f;
 
         activeBlocks = new List<GameObject>();
 
@@ -120,7 +120,7 @@ public class BlockCreator : MonoBehaviour {
 
         zToSpawn += blockWidth;
         activeBlocks.Add(pooledUpper);
-        activeBlocks.Add(pooledDowner);
+        //activeBlocks.Add(pooledDowner);
     }
 
     void DeleteBlock()
@@ -143,15 +143,15 @@ public class BlockCreator : MonoBehaviour {
         if (player.transform.position.z - 4f > zToSpawn - (firstSpawnBlockCount * blockWidth))
         {
             SpawnBlock();
-            DeleteBlock();
+            //DeleteBlock();
         }
 
         if (player.transform.position.z > roadmapThreshold)
         {
-            upperPositionLimitDown+= .2f;
-            upperPositionLimitUp += .2f;
-            downerPositionLimitDown-= .2f;
-            downerPositionLimitUp -= .2f;
+            upperPositionLimitDown+= .1f;
+            upperPositionLimitUp += .1f;
+            downerPositionLimitDown-= .1f;
+            downerPositionLimitUp -= .1f;
 
             roadmapThreshold *= 2;
         }
@@ -159,7 +159,9 @@ public class BlockCreator : MonoBehaviour {
 
     public Transform GetRelativeBlock(float playerPosZ)
     {
+        int indexBlock = (int)Mathf.Round(playerPosZ) + 2;
+        return activeBlocks[indexBlock].transform;
+
         //You may need this type of getter to which block are we going to cast our rope into
-        return null;
     }
 }

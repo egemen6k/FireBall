@@ -32,21 +32,24 @@ public class PlayerController : MonoBehaviour {
 	void Start ()
     {
         BlockCreator.GetSingleton().Initialize(30, blockPrefabs, pointPrefab);
-        FindRelativePosForHingeJoint(new Vector3(0,10,0));
+        FindRelativePosForHingeJoint(new Vector3(0, 5.5f ,0));
 	}
 	
     public void FindRelativePosForHingeJoint(Vector3 blockPosition)
     {
         //Update the block position on this line in a proper way to Find Relative position for our blockPosition
+        transform.rotation = Quaternion.Euler(0, 0, 0);
         hJoint.anchor = (blockPosition - transform.position) ;
         lRenderer.SetPosition(1, hJoint.anchor);
         lRenderer.enabled = true;
     }
 
-    
     public void PointerDown()
     {
         Debug.Log("Pointer Down");
+
+        Transform blockToCatch = BlockCreator.GetSingleton().GetRelativeBlock(transform.position.z);
+        FindRelativePosForHingeJoint(blockToCatch.position - new Vector3(0,4.5f,0));
         //This function works once when player holds on the screen
         //FILL the behaviour here when player holds on the screen. You may or not call other functions you create here or just fill it here
     }
