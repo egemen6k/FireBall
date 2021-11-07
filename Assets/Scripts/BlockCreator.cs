@@ -83,11 +83,11 @@ public class BlockCreator : MonoBehaviour {
 
     private void Start()
     {
-        upperPositionLimitDown = 8f;
-        upperPositionLimitUp = 13f;
+        upperPositionLimitDown = -2f;
+        upperPositionLimitUp = +2f;
 
-        downerPositionLimitDown = 8f;
-        downerPositionLimitUp = 13f;
+        downerPositionLimitDown = -2f;
+        downerPositionLimitUp = +2f;
 
         activeBlocks = new List<GameObject>();
 
@@ -105,10 +105,10 @@ public class BlockCreator : MonoBehaviour {
         float RandomYDowner = Random.Range(downerPositionLimitDown, downerPositionLimitUp);
 
         int blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
+        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * (RandomYUpper + 10)), Quaternion.identity);
 
         blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * RandomYDowner), Quaternion.identity);
+        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * (RandomYDowner + 10)), Quaternion.identity);
 
         zToSpawn += blockWidth;
         activeBlocks.Add(pooledUpper);
@@ -135,10 +135,10 @@ public class BlockCreator : MonoBehaviour {
 
         if (player.transform.position.z > roadmapThreshold)
         {
-            upperPositionLimitDown++;
-            upperPositionLimitUp++;
-            downerPositionLimitDown--;
-            downerPositionLimitUp--;
+            upperPositionLimitDown+= .2f;
+            upperPositionLimitUp += .2f;
+            downerPositionLimitDown-= .2f;
+            downerPositionLimitUp -= .2f;
 
             roadmapThreshold *= 2;
         }
