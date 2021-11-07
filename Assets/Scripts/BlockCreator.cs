@@ -19,9 +19,13 @@ public class BlockCreator : MonoBehaviour {
     private int zToSpawn = 1;
     private int blockWidth = 1;
     private int firstSpawnBlockCount = 20;
-    private int blocksSize;
     private List<GameObject> activeBlocks;
     private GameObject[] sceneBlockes;
+
+    private float upperPositionLimitDown, upperPositionLimitUp;
+    private float downerPositionLimitDown, downerPositionLimitUp;
+    private float roadmapThreshold = 5f;
+
 
     public static BlockCreator GetSingleton()
     {
@@ -79,7 +83,12 @@ public class BlockCreator : MonoBehaviour {
 
     private void Start()
     {
-        blocksSize = poolDictionary.Count;
+        upperPositionLimitDown = 8f;
+        upperPositionLimitUp = 13f;
+
+        downerPositionLimitDown = 8f;
+        downerPositionLimitUp = 13f;
+
         activeBlocks = new List<GameObject>();
 
         for (int i = 0; i < firstSpawnBlockCount; i++)
@@ -92,22 +101,18 @@ public class BlockCreator : MonoBehaviour {
 
     private void SpawnBlock()
     {
-        int RandomY = Random.Range(8, 13);
+        float RandomYUpper = Random.Range(upperPositionLimitDown, upperPositionLimitUp);
+        float RandomYDowner = Random.Range(downerPositionLimitDown, downerPositionLimitUp);
 
         int blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomY), Quaternion.identity);
+        GameObject pooledUpper = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.up * RandomYUpper), Quaternion.identity);
 
         blockIndex = Random.Range(0, blockPrefabs.Length);
-        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) - (Vector3.up * RandomY), Quaternion.identity);
+        GameObject pooledDowner = GetPooledBlock(blockPrefabs[blockIndex].name, (Vector3.forward * zToSpawn) + (Vector3.down * RandomYDowner), Quaternion.identity);
 
         zToSpawn += blockWidth;
         activeBlocks.Add(pooledUpper);
         activeBlocks.Add(pooledDowner);
-    }
-
-    void Update()
-    {
-
     }
 
     void DeleteBlock()
@@ -120,20 +125,28 @@ public class BlockCreator : MonoBehaviour {
         }
     }
 
-    //Yukarı ve aşağı ilerlemeli hissi için transform.z ile değişen Y offset değeri eklenecek.
+    public void UpdateBlockPosition(Transform player)
+    {
+        if (player.transform.position.z - 4f > zToSpawn - (firstSpawnBlockCount * blockWidth))
+        {
+            SpawnBlock();
+            DeleteBlock();
+        }
+
+        if (player.transform.position.z > roadmapThreshold)
+        {
+            upperPositionLimitDown++;
+            upperPositionLimitUp++;
+            downerPositionLimitDown--;
+            downerPositionLimitUp--;
+
+            roadmapThreshold *= 2;
+        }
+    }
 
     public Transform GetRelativeBlock(float playerPosZ)
     {
         //You may need this type of getter to which block are we going to cast our rope into
         return null;
-    }
-
-    public void UpdateBlockPosition(Transform player)
-    {
-        if (player.transform.position.z - 10f > zToSpawn - (firstSpawnBlockCount * blockWidth))
-        {
-            SpawnBlock();
-            DeleteBlock();
-        }
     }
 }

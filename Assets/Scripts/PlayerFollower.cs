@@ -18,6 +18,11 @@ public class PlayerFollower : MonoBehaviour {
         yDifference = player.transform.position.y - transform.position.y;
     }
 
+    private void Start()
+    {
+        SetPosition(GameObject.Find("Player").transform);
+    }
+
     //int lastPassageIndex = -1;
     private void Update()
     {
